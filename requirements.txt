@@ -1,7 +1,7 @@
 open_clip_torch
 pandas
 numpy
-tqdm 
+tqdm
 toml
 openai
 python-dotenv
@@ -15,4 +15,10 @@ torch_scatter
 torch_sparse
 torch_cluster
 torch_spline_conv
-torch_geometric 
+torch_geometric
+
+gdown
+matplotlib
+pytorch_lightning
+wandb
+clip
