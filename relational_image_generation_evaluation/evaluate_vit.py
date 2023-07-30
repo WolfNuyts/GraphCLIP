@@ -1,15 +1,20 @@
 import os
-#os.environ["CUDA_VISIBLE_DEVICES"]="3"
 from tqdm import tqdm
 from PIL import Image
 import relational_image_generation_evaluation as rige
 
+WORKING_DIR = '../struct_IF/results/old/DAA20-if'
+eval_relationships = False
 
-#evaluator = rige.Evaluator('ViT-L/14', device='cuda:0')
-evaluator = rige.Evaluator('ViT-L/14-Datacomp', device='cuda:0')
-adv_dataset = rige.get_adversarial_attribute_dataset()
-orig_prompts, adv_prompts = rige.get_adv_prompt_list('attributes')
-#print("len(dataset):", len(adv_dataset))
+evaluator = rige.Evaluator('ViT-L/14', device='cuda:0')
+#evaluator = rige.Evaluator('ViT-L/14-Datacomp', device='cuda:0')
+if eval_relationships:
+    adv_dataset = rige.get_adversarial_relationship_dataset()
+    score_tag = 'rel_scores'
+else:
+    adv_dataset = rige.get_adversarial_attribute_dataset()
+    score_tag = 'attr_scores'
+    #orig_prompts, adv_prompts = rige.get_adv_prompt_list('attributes')
 
 orig_images = []
 orig_correct_graphs = []
@@ -18,7 +23,6 @@ adv_images = []
 adv_correct_graphs = []
 adv_wrong_graphs = []
 
-WORKING_DIR = '../struct_IF/results/RJDS4'
 dirs = []
 for fname in os.listdir(WORKING_DIR):
     if os.path.isdir(os.path.join(WORKING_DIR,fname)):
@@ -30,7 +34,7 @@ for IMAGE_DIR in dirs:
     img_names = os.listdir(IMAGE_DIR)
     img_names.sort()
     for image_name in tqdm(img_names, desc='loading data...'):
-        if not image_name.endswith('II.png'):
+        if not image_name.endswith('_I.png'):
             continue
         ident, seed = image_name.split('_')[0], image_name.split('_')[1]
         ident_id, ident_ds = ident.split('-')
@@ -59,16 +63,16 @@ for IMAGE_DIR in dirs:
     adv_wrong_scores = evaluator(adv_images, adv_wrong_graphs)
 
     acc = 0
-    for correct_score, wrong_score in zip(og_correct_scores['attr_scores'], og_wrong_scores['attr_scores']):
+    for correct_score, wrong_score in zip(og_correct_scores[score_tag], og_wrong_scores[score_tag]):
         if correct_score > wrong_score:
             acc += 1
-    og_acc = acc/len(og_correct_scores['attr_scores'])
+    og_acc = acc/len(og_correct_scores[score_tag])
 
     acc = 0
-    for correct_score, wrong_score in zip(adv_correct_scores['attr_scores'], adv_wrong_scores['attr_scores']):
+    for correct_score, wrong_score in zip(adv_correct_scores[score_tag], adv_wrong_scores[score_tag]):
         if correct_score > wrong_score:
             acc += 1
-    adv_acc = acc/len(adv_correct_scores['attr_scores'])
+    adv_acc = acc/len(adv_correct_scores[score_tag])
 
     print('\n--- {} ---------------'.format(os.path.basename(IMAGE_DIR)))
     print('og accuracy: \t{:.1f}'.format(og_acc*100))
