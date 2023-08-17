@@ -3,11 +3,13 @@ from tqdm import tqdm
 from PIL import Image
 import relational_image_generation_evaluation as rige
 
-WORKING_DIR = '../struct_IF/results/old/DAA20-if'
+WORKING_DIR = '../struct_IF/results/DAA-earlyStop'
 eval_relationships = False
 
-evaluator = rige.Evaluator('ViT-L/14', device='cuda:0')
-#evaluator = rige.Evaluator('ViT-L/14-Datacomp', device='cuda:0')
+model = 'ViT-L/14'
+#model = 'ViT-L/14-Datacomp'
+print('using model: {}'.format(model))
+evaluator = rige.Evaluator(model, device='cuda:0')
 if eval_relationships:
     adv_dataset = rige.get_adversarial_relationship_dataset()
     score_tag = 'rel_scores'
@@ -16,12 +18,6 @@ else:
     score_tag = 'attr_scores'
     #orig_prompts, adv_prompts = rige.get_adv_prompt_list('attributes')
 
-orig_images = []
-orig_correct_graphs = []
-orig_wrong_graphs = []
-adv_images = []
-adv_correct_graphs = []
-adv_wrong_graphs = []
 
 dirs = []
 for fname in os.listdir(WORKING_DIR):
@@ -31,10 +27,17 @@ if len(dirs) == 0:
     dirs = [WORKING_DIR]
 
 for IMAGE_DIR in dirs:
+    orig_images = []
+    orig_correct_graphs = []
+    orig_wrong_graphs = []
+    adv_images = []
+    adv_correct_graphs = []
+    adv_wrong_graphs = []
+
     img_names = os.listdir(IMAGE_DIR)
     img_names.sort()
     for image_name in tqdm(img_names, desc='loading data...'):
-        if not image_name.endswith('_I.png'):
+        if not image_name.endswith('_II.png'):
             continue
         ident, seed = image_name.split('_')[0], image_name.split('_')[1]
         ident_id, ident_ds = ident.split('-')
@@ -55,7 +58,7 @@ for IMAGE_DIR in dirs:
             adv_wrong_graphs.append(adv_dataset[ident_id]['original_graph'])
         else:
             assert False
-
+    print('nb of found images: {}-{}'.format(len(orig_images), len(adv_images)))
     print('calculating scores...')
     og_correct_scores = evaluator(orig_images, orig_correct_graphs)
     og_wrong_scores = evaluator(orig_images, orig_wrong_graphs)
