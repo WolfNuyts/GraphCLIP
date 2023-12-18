@@ -1,10 +1,9 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
 from tqdm import tqdm
 from PIL import Image
 import relational_image_generation_evaluation as rige
 
-WORKING_DIR = '../struct_IF/results/CC500'
+WORKING_DIR = '../struct_IF/results/ae_v2_CC'
 
 evaluator = rige.Evaluator('ViT-L/14', device='cuda:0')
 #evaluator = rige.Evaluator('ViT-L/14-Datacomp', device='cuda:0')

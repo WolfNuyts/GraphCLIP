@@ -3,7 +3,7 @@ from tqdm import tqdm
 from PIL import Image
 import relational_image_generation_evaluation as rige
 
-WORKING_DIR = '../struct_IF/results/DAA-earlyStop'
+WORKING_DIR = '../struct_IF/results/ae_CC'
 eval_relationships = False
 
 model = 'ViT-L/14'
